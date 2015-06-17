@@ -11,47 +11,28 @@
 <script language="javascript">
 
     var data = [
-      { date: "2011-11-14T16:17:54Z", quantity: 2, total: 190, tip: 100, type: "tab" },
-      { date: "2011-11-14T16:20:19Z", quantity: 2, total: 190, tip: 100, type: "tab" },
-      { date: "2011-11-14T16:28:54Z", quantity: 1, total: 300, tip: 200, type: "visa" },
-      { date: "2011-11-14T16:30:43Z", quantity: 2, total: 90, tip: 0, type: "tab" },
-      { date: "2011-11-14T16:48:46Z", quantity: 2, total: 90, tip: 0, type: "tab" },
-      { date: "2011-11-14T16:53:41Z", quantity: 2, total: 90, tip: 0, type: "tab" },
-      { date: "2011-11-14T16:54:06Z", quantity: 1, total: 100, tip: 0, type: "cash" },
-      { date: "2011-11-14T16:58:03Z", quantity: 2, total: 90, tip: 0, type: "tab" },
-      { date: "2011-11-14T17:07:21Z", quantity: 2, total: 90, tip: 0, type: "tab" },
-      { date: "2011-11-14T17:22:59Z", quantity: 2, total: 90, tip: 0, type: "tab" },
-      { date: "2011-11-14T17:25:45Z", quantity: 2, total: 200, tip: 0, type: "cash" },
-      { date: "2011-11-14T17:29:52Z", quantity: 1, total: 200, tip: 100, type: "visa" }
+		{ date: "12/27/2012", http_404: 2, http_200: 190, http_302: 100 },
+		{ date: "12/28/2012", http_404: 2, http_200: 10, http_302: 100 },
+		{ date: "12/29/2012", http_404: 1, http_200: 300, http_302: 200 },
+		{ date: "12/30/2012", http_404: 2, http_200: 90, http_302: 0 },
+		{ date: "12/31/2012", http_404: 2, http_200: 90, http_302: 0 },
+		{ date: "01/01/2013", http_404: 2, http_200: 90, http_302: 0 },
+		{ date: "01/02/2013", http_404: 1, http_200: 10, http_302: 1 },
+		{ date: "01/03/2013", http_404: 2, http_200: 90, http_302: 0 },
+		{ date: "01/04/2013", http_404: 2, http_200: 90, http_302: 0 },
+		{ date: "01/05/2013", http_404: 2, http_200: 90, http_302: 0 },
+		{ date: "01/06/2013", http_404: 2, http_200: 200, http_302: 1 },
+		{ date: "01/07/2013", http_404: 1, http_200: 200, http_302: 100 }
     ];
 
     var ndx = crossfilter(data);
 
-    var totalDim = ndx.dimension(function (d) { return d.total });
-    var total_90 = totalDim.filter(90);
-    print_filter("total_90");
-    var total_90_100 = totalDim.filter([90, 101]);
-    print_filter("total_90_100");
-    var total_3 = totalDim.filter(function (d)
-    {
-        if (d % 3 == 0)
-        {
-            return d;
-        }
+    var parseDate = d3.time.format("%m/%d/%Y").parse;
+    data.forEach(function (d) {
+        d.date = parseDate(d.date);
+        d.total = d.http_404 + d.http_200 + d.http_302;
     });
-    print_filter("total_3");
-
-    var typeDim = ndx.dimension(function (d) { return d.type });
-    var visa_filter = typeDim.filter("visa");
-    print_filter("visa_filter");
-    totalDim.filterAll();
-    var cash_filter = typeDim.filter("cash");
-    print_filter("cash_filter");
-
-    var total = typeDim.group().reduceSum(function (d) { return d.total; });
-    print_filter("total")
-    var cash_total = ndx.groupAll().reduceSum(function (d) { return d.total; }).value();
-    print_filter("cash_total");
+    print_filter("data");
 
     function print_filter(filter) {
         var f = eval(filter);
