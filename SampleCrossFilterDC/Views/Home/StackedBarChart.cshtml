@@ -1,0 +1,167 @@
+﻿@{
+    ViewBag.Title = "StackedBarChart";
+}
+<script src="~/Scripts/jquery-1.8.2.min.js"></script>
+<script src="~/Scripts/crossfilter.js"></script>
+@*<script src="~/Scripts/d3.v3.min.js"></script>*@
+<script src="~/Scripts/d3.js"></script>
+<script src="~/Scripts/dc.js"></script>
+<link href="~/Styles/dc.css" rel="stylesheet" />
+@*<script src="~/Scripts/dc-mod.js"></script>
+<link href="~/Styles/dcSollis.css" rel="stylesheet" />*@
+<style type="text/css">
+    #chart g.stack._0  > rect.bar {
+    stroke: none;
+    fill: red;
+    }
+
+    #chart g.stack._1 > rect.bar {
+        stroke: none;
+        fill: yellow;
+    }
+
+    #chart g.stack._2 > rect.bar {
+        stroke: none;
+        fill: green;
+    }
+
+    #chart g.dc-legend-item:nth-child(1) > rect:nth-child(1) {
+        stroke: none;
+        fill: red;
+    }
+
+    #chart g.dc-legend-item:nth-child(2) > rect:nth-child(1) {
+        stroke: none;
+        fill: yellow;
+    }
+
+    #chart g.dc-legend-item:nth-child(3) > rect:nth-child(1) {
+        stroke: none;
+        fill: green;
+    }
+</style>
+<h2>StackedBarChart</h2>
+
+<div id="chart"></div>
+
+<script language="javascript">
+
+    var data = [
+        { "date": "2014/02/09", "apples": 10, "kiwis": 10, "lemons": 10 },
+        { "date": "2014/02/10", "apples": 2, "kiwis": 10, "lemons": 10 },
+        { "date": "2014/02/11", "apples": 10, "kiwis": 2, "lemons": 10 },
+        { "date": "2014/02/12", "apples": 10, "kiwis": 10, "lemons": 2 },
+        { "date": "2014/02/13", "apples": 2, "kiwis": 2, "lemons": 10 },
+        { "date": "2014/02/14", "apples": 2, "kiwis": 10, "lemons": 2 },
+        { "date": "2014/02/15", "apples": 10, "kiwis": 2, "lemons": 2 }
+    ];
+
+    var pdata = [
+        { "UniqueKey": "115976/OP/TST173092", "ActivityType": "OP", "ActivitySource": "RJ600", "EventDate": "2013-06-20" },
+        { "UniqueKey": "13687/IP/TST100954", "ActivityType": "IP", "ActivitySource": "RVR00", "EventDate": "2013-07-21" },
+        { "UniqueKey": "3834/IP/TST52450", "ActivityType": "IP", "ActivitySource": "REV00", "EventDate": "2013-08-23" },
+        { "UniqueKey": "154539/AE/TST127800", "ActivityType": "AE", "ActivitySource": "RVR00", "EventDate": "2013-12-30" },
+        { "UniqueKey": "100112/OP/TST208196", "ActivityType": "OP", "ActivitySource": "REV00", "EventDate": "2014-01-24" },
+        { "UniqueKey": "871017/GP/954967", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2014-11-29" },
+        { "UniqueKey": "871014/GP/139985", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-01-09" },
+        { "UniqueKey": "871016/GP/787121", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
+        { "UniqueKey": "871015/GP/658358", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-05-06" }];
+
+    dateFormat = d3.time.format("%Y/%m/%d");
+    data.forEach(function (e) {
+        e.dd = dateFormat.parse(e.date);
+    });
+
+    var cssChart = dc.barChart("#chart");
+    var xf = crossfilter(data);
+    //var ndx = crossfilter(pdata);
+    var ndx = crossfilter(pdata);
+
+    var dateDim = xf.dimension(function (d) {
+        return d.dd;
+    });
+    var eventsDim = ndx.dimension(function (d) {
+        return d3.time.day(new Date(d.EventDate))
+    });
+
+    var eventsByDate = dateDim.group().reduce(
+            function (p, v) {
+                p.apples += v.apples;
+                p.kiwis += v.kiwis;
+                p.lemons += v.lemons;
+                return p;
+            },
+            function (p, v) {
+                p.apples -= v.apples;
+                p.kiwis -= v.kiwis;
+                p.lemons -= v.lemons;
+                return p;
+            },
+            function () {
+                return {
+                    apples: 0,
+                    kiwis: 0,
+                    lemons: 0
+                };
+            }
+    );
+    var eventsByAcType = eventsDim.group(function (ActivityType) {
+        return ActivityType;
+    }).reduceCount();
+    print_filter("ndx");
+    print_filter("eventsByAcType");
+
+    var minDate = dateDim.bottom(1)[0].dd;
+    var maxDate = dateDim.top(1)[0].dd;
+
+    /* when any bar is clicked, recolor the chart */
+    var colorRenderlet = function (_chart) {
+        _chart.selectAll("rect.bar")
+                .on("click", function (d) {
+                    function setAttr(selection, keyName) {
+                        selection.style("fill", function (d) {
+                            if (d[keyName] == "Apples") return "#63D3FF";
+                            else if (d[keyName] == "Kiwis") return "#FF548F";
+                            else if (d[keyName] == "Lemons") return "#9061C2";
+                        });
+                    };
+                    setAttr(_chart.selectAll("g.stack").selectAll("rect.bar"), "layer")
+                    setAttr(_chart.selectAll("g.dc-legend-item").selectAll("rect"), "name")
+                });
+    };
+
+    cssChart
+            .margins({ top: 50, right: 20, left: 50, bottom: 50 })
+            .width(500)
+            .height(200)
+            .gap(50)
+            .dimension(dateDim)
+            .group(eventsByDate, "Apples")
+            .valueAccessor(function (d) {
+                return d.value.apples;
+            })
+            .stack(eventsByDate, "Kiwis", function (d) {
+                return d.value.kiwis;
+            })
+            .stack(eventsByDate, "Lemons", function (d) {
+                return d.value.lemons;
+            })
+            .x(d3.time.scale().domain([minDate, maxDate]))
+            .xUnits(d3.time.days)
+            .centerBar(true)
+            .elasticY(true)
+            .brushOn(false)
+            .renderlet(colorRenderlet)
+            .legend(dc.legend().x(100).y(0).itemHeight(13).gap(5))
+            .render();
+
+
+    function print_filter(filter) {
+        var f = eval(filter);
+        if (typeof (f.length) != "undefined") { } else { }
+        if (typeof (f.top) != "undefined") { f = f.top(Infinity); } else { }
+        if (typeof (f.dimension) != "undefined") { f = f.dimension(function (d) { return ""; }).top(Infinity); } else { }
+        console.log(filter + "(" + f.length + ") = " + JSON.stringify(f).replace("[", "[\n\t").replace(/}\,/g, "},\n\t").replace("]", "\n]"));
+    }
+
+</script>

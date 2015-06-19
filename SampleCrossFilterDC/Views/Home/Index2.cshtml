@@ -1,0 +1,119 @@
+﻿@{
+    ViewBag.Title = "Index2";
+}
+<script src="~/Scripts/jquery-1.8.2.min.js"></script>
+<script src="~/Scripts/crossfilter.js"></script>
+<script src="~/Scripts/d3.v3.min.js"></script>
+<script src="~/Scripts/dc.js"></script>
+    <link href="~/Styles/dc.css" rel="stylesheet" />
+@*<script src="~/Scripts/dc-mod.js"></script>
+<link href="~/Styles/dcSollis.css" rel="stylesheet" />*@
+<script src="https://cdn.datatables.net/1.10.5/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.5/css/jquery.dataTables.min.css" media="screen" /> 
+
+<h2>Index2</h2>
+
+<div id="ubc-graph" />
+@*<div id="TimeLine" style="width:900px;height:200px"></div>*@
+<table id="dc-data-table" class="list table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Country</th>
+            <th>Users</th>
+        </tr>
+    </thead>
+</table>
+
+<style type="text/css">
+    table, th, tr, td {
+        border: 1px solid black;
+    }
+</style>
+
+<script language="javascript">
+
+    var data = [
+        { "UniqueKey": "115976/OP/TST173092", "ActivityType": "OP", "ActivitySource": "RJ600", "EventDate": "2013-06-20" },
+        { "UniqueKey": "13687/IP/TST100954", "ActivityType": "IP", "ActivitySource": "RVR00", "EventDate": "2013-07-21" },
+        { "UniqueKey": "3834/IP/TST52450", "ActivityType": "IP", "ActivitySource": "REV00", "EventDate": "2013-08-23" },
+        { "UniqueKey": "154539/AE/TST127800", "ActivityType": "AE", "ActivitySource": "RVR00", "EventDate": "2013-12-30" },
+        { "UniqueKey": "100112/OP/TST208196", "ActivityType": "OP", "ActivitySource": "REV00", "EventDate": "2014-01-24" },
+        { "UniqueKey": "871017/GP/954967", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2014-11-29" },
+        { "UniqueKey": "871014/GP/139985", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-01-09" },
+        { "UniqueKey": "871016/GP/787121", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
+        { "UniqueKey": "871015/GP/658358", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-05-06" }];
+
+    var countries = ["Russia", "USA", "Ukraine"];
+    var chartExample = {
+        initChart: function (data) {
+            var chart = dc.barChart("#ubc-graph");
+
+            var ndx = crossfilter(data),
+                countryDimension = ndx.dimension(function (d) {
+                    return d.country;
+                }),
+                countryGroup = countryDimension.group().reduceSum(function (d) {
+                    return d.users;
+                });
+
+            var datatable = $("#dc-data-table").dataTable({
+                "bPaginate": false,
+                "bLengthChange": false,
+                "bFilter": false,
+                "bSort": true,
+                "bInfo": false,
+                "bAutoWidth": false,
+                "bDeferRender": true,
+                "aaData": countryDimension.top(Infinity),
+                "bDestroy": true,
+                "aoColumns": [
+                    { "mData": "country", "sDefaultContent": "" },
+                    { "mData": "users", "sDefaultContent": " " }
+                ]
+            });
+
+            chart.width(500)
+                .height(400)
+                .gap(100)
+            .centerBar(true)
+                .x(d3.scale.ordinal().domain(countries))
+                .yAxisLabel("User Count")
+                .renderHorizontalGridLines(true)
+                .dimension(countryDimension)
+                .group(countryGroup)
+                .xUnits(dc.units.ordinal);
+
+            function RefreshTable() {
+                dc.events.trigger(function () {
+                    alldata = countryDimension.top(Infinity);
+                    datatable.fnClearTable();
+                    datatable.fnAddData(alldata);
+                    datatable.fnDraw();
+                });
+            }
+
+            for (var i = 0; i < dc.chartRegistry.list().length; i++) {
+                var chartI = dc.chartRegistry.list()[i];
+                chartI.on("filtered", RefreshTable);
+            }
+
+            dc.renderAll();
+        },
+        initData: function () {
+            var data = [];
+
+            for (var i = 0; i < 100; i++) {
+                var country = countries[Math.floor((Math.random() * countries.length))];
+                var userCount = Math.floor(Math.random() * 100);
+                data.push({
+                    country: country,
+                    users: userCount
+                });
+            }
+            chartExample.initChart(data);
+        }
+    };
+
+    chartExample.initData();
+
+</script>

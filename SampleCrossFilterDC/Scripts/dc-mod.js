@@ -6780,7 +6780,8 @@ dc.dataTableSummary = function(parent, chartGroup) {
 
 
 
-dc.dataTableDetail = function(parent, chartGroup) {
+dc.dataTableDetail =
+    function (parent, chartGroup) {
 
     var LABEL_CSS_CLASS = "dc-table-label";
     var ROW_CSS_CLASS = "dc-table-row";
@@ -10460,25 +10461,32 @@ dc.timeLine = function (parent, chartGroup) {
         //alert(mid2);
         //var x = d3.time.scale().domain([new Date(d[0].StartDate), new Date(d[d.length - 1].EndDate)]).rangeRound([0,600]);
         x = d3.time.scale().domain([new Date(mid), new Date(mxd)]).rangeRound([10,890]);
-        var plot = tl.selectAll("circle").data(d);
-        plot.enter().append("circle").attr("cx", function (d) { return x(new Date(d.EventDate)) }).attr("cy", 20).attr("r", 3).attr("fill", function (d) { return GetColor(d.ActivityType) })
-        .on("click", function (d, i) { rec = "#R" + i; td.select(rec); document.getElementById("R" + i).scrollIntoView(); })
+        var plot = tl.selectAll("path").data(d);
+        plot.transition().duration(500).attr("transform", function (d) { return "translate(" + x(new Date(d.EventDate)) + ",10)" });
+
+        plot.enter().append("path").attr("d", "m3.61,12.12813l5.00008,-6.5l4.99992,6.5l-10,0z").attr("fill", function (d) { return GetColour(d.ActivityType) }).attr("transform", function (d) { return "translate(" + x(new Date(d.EventDate)) + ",10)" })
+        //plot.enter().append("circle").attr("cx", function (d) { return x(new Date(d.EventDate)) }).attr("cy", 20).attr("r", 3).attr("fill", function (d) { return GetColor(d.ActivityType) })
         .on("mouseover", function (d) { tip = d.ActivityType + "(" + d.EventDate + ")"; dc.ShowToolTip(tip, '') })
         .on("mouseout", function (d) { dc.HideToolTip(); } )
-        .on("mousemove", function (d) { dc.MoveToolTip();} );
+        .on("mousemove", function (d) { dc.MoveToolTip(); })
+        .on("click", function (d, i) {
+            var id = d.UniqueKey.substr(0, d.UniqueKey.indexOf("/"));
+            document.getElementById(id).scrollIntoView();
+            $("#"+id).css("background-color", "green");
+        });
 
         plot.exit().remove();
         
-        plot.attr("cx", function (d) { return x(new Date(d.EventDate)) }).attr("cy", 20).attr("r", 3);
+        
 
        
         var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(d3.time.months, 1).tickFormat(d3.time.format("%b %y")).tickSize(0).tickPadding(4);
         if (!_doneOnce) {
           
-            tl.append("g").attr("class","xaxis").attr("transform", "translate(0,80)").call(xAxis).selectAll(".tick").select("text").attr("transform", "rotate(90)");
+            tl.append("g").attr("class","xaxis").attr("transform", "translate(10,80)").call(xAxis).selectAll(".tick").select("text").attr("transform", "rotate(90)");
         }
         else {
-            var y = tl.selectAll("axis");
+            var y = tl.selectAll("g.xaxis");
             y.call(xAxis).selectAll(".tick").select("text").attr("transform", "rotate(90)");
         
            // tl.append("g").attr("transform", "translate(0,80)").call(xAxis).selectAll(".tick").select("text").attr("transform", "rotate(90)");
