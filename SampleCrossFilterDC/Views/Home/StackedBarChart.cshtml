@@ -43,6 +43,7 @@
 <h2>StackedBarChart</h2>
 
 <div id="chart"></div>
+<div id='eventschart'></div>
 
 <script language="javascript">
 
@@ -65,6 +66,8 @@
         { "UniqueKey": "871017/GP/954967", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2014-11-29" },
         { "UniqueKey": "871014/GP/139985", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-01-09" },
         { "UniqueKey": "871016/GP/787121", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
+        { "UniqueKey": "871016/GP/787122", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
+        { "UniqueKey": "871016/IP/TST787122", "ActivityType": "IP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
         { "UniqueKey": "871015/GP/658358", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-05-06" }];
 
     dateFormat = d3.time.format("%Y/%m/%d");
@@ -73,6 +76,8 @@
     });
 
     var cssChart = dc.barChart("#chart");
+    var eventsChart = dc.barChart('#eventschart');
+
     var xf = crossfilter(data);
     //var ndx = crossfilter(pdata);
     var ndx = crossfilter(pdata);
@@ -83,6 +88,10 @@
     var eventsDim = ndx.dimension(function (d) {
         return d3.time.day(new Date(d.EventDate))
     });
+    //var eventsDim = ndx.dimension(function (d) {
+    //    var thisDay = d3.time.day(new Date(d.EventDate));
+    //    return 'day=' + thisDay + ';ActivityType=' + d.ActivityType;
+    //});
 
     var eventsByDate = dateDim.group().reduce(
             function (p, v) {
@@ -105,14 +114,65 @@
                 };
             }
     );
-    var eventsByAcType = eventsDim.group(function (ActivityType) {
-        return ActivityType;
-    }).reduceCount();
+    var eventsByAcType = eventsDim.group().reduce(
+        function(p,v) {
+            switch (v.ActivityType) {
+                case "IP": 
+                    p.ip += 1;
+                    p
+                    break;
+                case "OP":
+                    p.op += 1;
+                    break;
+                case "AE":
+                    p.ae += 1;
+                    break;
+                case "GP":
+                    p.gp += 1;
+                    break;
+                default:
+                    break;
+            }
+            return p;
+        },
+        function (p,v) {
+            switch (v.ActivityType) {
+                case "IP": 
+                    p.ip -= 1;
+                    break;
+                case "OP":
+                    p.op -= 1;
+                    break;
+                case "AE":
+                    p.ae -= 1;
+                    break;
+                case "GP":
+                    p.gp -= 1;
+                    break;
+                default:
+                    break;
+            }
+            return p;
+        },
+        function () {
+            return {
+                ip : 0,
+                op : 0,
+                ae : 0,
+                gp : 0
+            };
+        }
+    );
+    //var eventsByAcType = eventsDim.group().reduceCount(function (d) { return d.UniqueKey; }).all();
     print_filter("ndx");
     print_filter("eventsByAcType");
+    print_filter("eventsByDate");
+    print_filter("eventsDim");
 
     var minDate = dateDim.bottom(1)[0].dd;
     var maxDate = dateDim.top(1)[0].dd;
+    var minEventDate = d3.min(pdata, function (d) { return new Date(d.EventDate) });
+    var maxEventDate = d3.max(pdata, function (d) { return new Date(d.EventDate) });
 
     /* when any bar is clicked, recolor the chart */
     var colorRenderlet = function (_chart) {
@@ -151,10 +211,40 @@
             .centerBar(true)
             .elasticY(true)
             .brushOn(false)
-            .renderlet(colorRenderlet)
+            //.renderlet(colorRenderlet)
             .legend(dc.legend().x(100).y(0).itemHeight(13).gap(5))
             .render();
 
+    eventsChart
+        .margins({ top: 50, right: 20, left: 50, bottom: 50 })
+        .width(800)
+        .height(200)
+        .gap(50)
+        .dimension(eventsDim)
+        .group(eventsByAcType, "IP", function (d) {
+            return d.value.ip;
+        })
+        //.valueAccessor(function (d) {
+        //    return d.value.ip;
+        //})
+        .stack(eventsByAcType,"OP", function(d) {
+            return d.value.op;
+        })
+        .stack(eventsByAcType, "AE", function (d) {
+            return d.value.ae;
+        })
+        .stack(eventsByAcType, "GP", function (d) {
+            return d.value.gp;
+        })
+        .x(d3.time.scale().domain([new Date(minEventDate), new Date(maxEventDate)]))
+        //.rangeRound([10, 800])
+        .xUnits(d3.time.days)
+        .centerBar(true)
+        .elasticY(true)
+        .brushOn(false)
+        //.renderlet(colorRenderlet)
+        .legend(dc.legend().x(100).y(0).itemHeight(13).gap(5))
+        .render();
 
     function print_filter(filter) {
         var f = eval(filter);
