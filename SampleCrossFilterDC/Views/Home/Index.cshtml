@@ -1,151 +1,245 @@
 ﻿@{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "StackedBarChart";
 }
 <script src="~/Scripts/jquery-1.8.2.min.js"></script>
 <script src="~/Scripts/crossfilter.js"></script>
 @*<script src="~/Scripts/d3.v3.min.js"></script>*@
 <script src="~/Scripts/d3.js"></script>
-@*<script src="~/Scripts/dc.js"></script>
-<link href="~/Styles/dc.css" rel="stylesheet" />*@
-<script src="~/Scripts/dc-mod.js"></script>
-<link href="~/Styles/dcSollis.css" rel="stylesheet" />
-<script src="https://cdn.datatables.net/1.10.5/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.5/css/jquery.dataTables.min.css" media="screen" /> 
+<script src="~/Scripts/dc.js"></script>
+<link href="~/Styles/dc.css" rel="stylesheet" />
+@*<script src="~/Scripts/dc-mod.js"></script>
+<link href="~/Styles/dcSollis.css" rel="stylesheet" />*@
 
-<h2>Index</h2>
-
-@*<div id="ubc-graph" />*@
-<div id="TimeLine" style="width:900px;height:200px"></div>
-<table id="dc-data-table" class="list table table-striped table-bordered">
-    <thead>
-        <tr>
-            <th>Unique Key</th>
-            <th>Activity Type</th>
-            <th>Activity Source</th>
-            <th>Event Date</th>
-        </tr>
-    </thead>
-</table>
-
-<style type="text/css">
-    table, th, tr, td {
-        border: 1px solid black;
-    }
-</style>
+<h2>StackedBarChart</h2>
+@*<div id="eventschart" style="width:1000px;height:550px;overflow-x:scroll"></div>*@
+<div id="eventschart" style="width:1050px;height:550px"></div>
+<div id="chartbrush" style="width:1020px;height:120px;border:groove"></div>
 
 <script language="javascript">
 
-    var data = [
-        { "DT_RowId": "115976", "UniqueKey": "115976/OP/TST173092", "ActivityType": "OP", "ActivitySource": "RJ600", "EventDate": "2013-06-20" },
-        { "DT_RowId": "13687", "UniqueKey": "13687/IP/TST100954", "ActivityType": "IP", "ActivitySource": "RVR00", "EventDate": "2013-07-21" },
-        { "DT_RowId": "3834", "UniqueKey": "3834/IP/TST52450", "ActivityType": "IP", "ActivitySource": "REV00", "EventDate": "2013-08-23" },
-        { "DT_RowId": "154539", "UniqueKey": "154539/AE/TST127800", "ActivityType": "AE", "ActivitySource": "RVR00", "EventDate": "2013-12-30" },
-        { "DT_RowId": "100112", "UniqueKey": "100112/OP/TST208196", "ActivityType": "OP", "ActivitySource": "REV00", "EventDate": "2014-01-24" },
-        { "DT_RowId": "871017", "UniqueKey": "871017/GP/954967", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2014-11-29" },
-        { "DT_RowId": "871014", "UniqueKey": "871014/GP/139985", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-01-09" },
-        { "DT_RowId": "871016", "UniqueKey": "871016/GP/787121", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
-        { "DT_RowId": "871015", "UniqueKey": "871015/GP/658358", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-05-06" }];
+    var pdata = [
+        { "UniqueKey": "115976/OP/TST173092", "ActivityType": "OP", "ActivitySource": "RJ600", "EventDate": "2013-06-20" },
+        { "UniqueKey": "13687/IP/TST100954", "ActivityType": "IP", "ActivitySource": "RVR00", "EventDate": "2013-07-21" },
+        { "UniqueKey": "3834/IP/TST52450", "ActivityType": "IP", "ActivitySource": "REV00", "EventDate": "2013-08-23" },
+        { "UniqueKey": "3834/OP/TST52450", "ActivityType": "OP", "ActivitySource": "REV00", "EventDate": "2013-08-23" },
+        { "UniqueKey": "154539/AE/TST127800", "ActivityType": "AE", "ActivitySource": "RVR00", "EventDate": "2013-12-30" },
+        { "UniqueKey": "154539/IP/TST127800", "ActivityType": "IP", "ActivitySource": "RVR00", "EventDate": "2013-12-30" },
+        { "UniqueKey": "100112/OP/TST208196", "ActivityType": "OP", "ActivitySource": "REV00", "EventDate": "2014-01-24" },
+        { "UniqueKey": "871017/GP/954967", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2014-11-29" },
+        { "UniqueKey": "871014/GP/139985", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-01-09" },
+        { "UniqueKey": "871016/GP/787121", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
+        { "UniqueKey": "871016/GP/787122", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
+        { "UniqueKey": "871016/IP/TST787122", "ActivityType": "IP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
+        { "UniqueKey": "871015/GP/658358", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-05-06" }];
 
-    var countries = ["Russia", "USA", "Ukraine"];
-    var chartExample = {
-        initChart: function (data) {
-            //var chart = dc.barChart("#ubc-graph");
+    dateFormat = d3.time.format("%Y/%m/%d");
 
-            var ndx = crossfilter(data),
-                //countryDimension = ndx.dimension(function (d) {
-                //    return d.country;
-                events = ndx.dimension(function (d) {
-                    return d3.time.day(new Date(d.EventDate))
-                }),
-                //countryGroup = countryDimension.group().reduceSum(function (d) {
-                //    return d.users;
-                //});
-                event_c = events.group().reduceCount();
+    var eventsChart = dc.barChart("#eventschart");
+    var chartBrush = dc.barChart("#chartbrush");
+    var ndx = crossfilter(pdata);
+    //var eventsDim = ndx.dimension(function (d) {
+    //    return d3.time.monday(new Date(d.EventDate))
+    //});
+    var eventsDim = ndx.dimension(function (d) {
+        return d3.time.day(new Date(d.EventDate))
+    });
 
-            var datatable = $("#dc-data-table").dataTable({
-                "bPaginate": false,
-                "bLengthChange": false,
-                "bFilter": false,
-                "bSort": true,
-                "bInfo": false,
-                "bAutoWidth": false,
-                "bDeferRender": true,
-                //"aaData": countryDimension.top(Infinity),
-                "aaData": events.top(Infinity),
-                "bDestroy": true,
-                //"aoColumns": [
-                //    { "mData": "country", "sDefaultContent": "" },
-                //    { "mData": "users", "sDefaultContent": " " }
-                "aoColumns": [
-                    { "mData": "UniqueKey", "sDefaultContent": "" },
-                    { "mData": "ActivityType", "sDefaultContent": "" },
-                    { "mData": "ActivitySource", "sDefaultContent": "" },
-                    { "mData": "EventDate", "sDefaultContent": "" }
-                ]
-            });
-
-            var d = eval(data);
-            var mid = d3.min(d, function (d) { return new Date(d.EventDate) });
-            var mxd = d3.max(d, function (d) { return new Date(d.EventDate) });
-            var chart = dc.timeLine("#TimeLine");
-            chart.width("400")
-                .height("200")
-                .dimension(events)
-                .group(event_c)
-                .x(d3.time.scale().domain([new Date(mid),new Date(mxd)]).rangeRound([10,800]));
-
-            //chart.width(500)
-            //    .height(400)
-            //    .gap(100)
-            //.centerBar(true)
-            //    .x(d3.scale.ordinal().domain(countries))
-            //    .yAxisLabel("User Count")
-            //    .renderHorizontalGridLines(true)
-            //    .dimension(countryDimension)
-            //    .group(countryGroup)
-            //    .xUnits(dc.units.ordinal);
-
-            function RefreshTable() {
-                console.log("clicked on chart");
-                dc.events.trigger(function () {
-                    //alldata = countryDimension.top(Infinity);
-                    alldata = events.top(Infinity);
-                    datatable.fnClearTable();
-                    datatable.fnAddData(alldata);
-                    datatable.fnDraw();
-                });
+    var eventsByAcType = eventsDim.group().reduce(
+        function (p, v) {
+            switch (v.ActivityType) {
+                case "IP":
+                    p.ip += 1;
+                    p
+                    break;
+                case "OP":
+                    p.op += 1;
+                    break;
+                case "AE":
+                    p.ae += 1;
+                    break;
+                case "GP":
+                    p.gp += 1;
+                    break;
+                default:
+                    break;
             }
-
-            chart.on("filtered", RefreshTable);
-            //chart.onClick(RefreshTable);
-
-            //for (var i = 0; i < dc.chartRegistry.list().length; i++) {
-            //    var chartI = dc.chartRegistry.list()[i];
-            //    chartI.on("filtered", RefreshTable);
-            //}
-
-            dc.renderAll();
-
-            //$("#dc-data-table tbody tr:3834/IP/TST52450").css("background-color", "blue");
-            //$("#871016").css("background-color", "blue");
-
+            return p;
         },
-        initData: function () {
-            var data = [];
-
-            for (var i = 0; i < 100; i++) {
-                var country = countries[Math.floor((Math.random() * countries.length))];
-                var userCount = Math.floor(Math.random() * 100);
-                data.push({
-                    country: country,
-                    users: userCount
-                });
+        function (p, v) {
+            switch (v.ActivityType) {
+                case "IP":
+                    p.ip -= 1;
+                    break;
+                case "OP":
+                    p.op -= 1;
+                    break;
+                case "AE":
+                    p.ae -= 1;
+                    break;
+                case "GP":
+                    p.gp -= 1;
+                    break;
+                default:
+                    break;
             }
-            chartExample.initChart(data);
+            return p;
+        },
+        function () {
+            return {
+                ip: 0,
+                op: 0,
+                ae: 0,
+                gp: 0
+            };
         }
+    );
+
+    print_filter("ndx");
+    print_filter("eventsByAcType");
+    print_filter("eventsDim");
+
+    //var minEventDate = d3.min(pdata, function (d) { return d3.time.monday(new Date(d.EventDate)) });
+    //var maxEventDate = d3.max(pdata, function (d) { return d3.time.monday(new Date(d.EventDate)) });
+    var minEventDate = d3.min(pdata, function (d) { return new Date(d.EventDate) });
+    var maxEventDate = d3.max(pdata, function (d) { return new Date(d.EventDate) });
+
+    eventsChart
+        //.margins({ top: 50, right: 20, left: 50, bottom: 50 })
+        .width(1000)
+        .height(500)
+        //.gap(50)
+        .dimension(eventsDim)
+        .group(eventsByAcType, "IP", function (d) {
+            return d.value.ip;
+        })
+        //.valueAccessor(function (d) {
+        //    return d.value.ip;
+        //})
+        .stack(eventsByAcType, "OP", function (d) {
+            return d.value.op;
+        })
+        .stack(eventsByAcType, "AE", function (d) {
+            return d.value.ae;
+        })
+        .stack(eventsByAcType, "GP", function (d) {
+            return d.value.gp;
+        })
+        //.x(d3.time.scale().domain([new Date(minEventDate), new Date(minEventDate.setMonth(minEventDate.getMonth() + 3))]))
+        //.x(d3.time.scale().domain([new Date(minEventDate), new Date(maxEventDate)]))
+        .x(d3.time.scale().domain([new Date(minEventDate), new Date(maxEventDate)]))
+        .xUnits(d3.time.mondays)
+        //.xUnits(function () { return 12; })
+        .elasticX(false)
+        //.xAxisPadding('10%')
+        .yAxisLabel("# events")
+        //.y(d3.scale.linear().domain([0, 10]))
+        .centerBar(true)
+        .elasticY(false)
+        .brushOn(false)
+        //.renderlet(colorRenderlet)
+        .legend(dc.legend().x(100).y(0).itemHeight(13).gap(5));
+        //.xAxis().ticks(d3.time.mondays, 1);//.tickFormat(d3.time.format("%W"));
+
+    //eventsChart.yAxis().ticks(3);
+    //eventsChart.selectAll('rect').on("click", function (d) {
+    //    console.log("clicked", d);
+    //});
+
+    chartBrush
+        //.margins({ top: 50, right: 20, left: 50, bottom: 50 })
+        .width(1000)
+        .height(100)
+        //.gap(50)
+        .dimension(eventsDim)
+        .group(eventsByAcType, "IP", function (d) {
+            return d.value.ip;
+        })
+        //.valueAccessor(function (d) {
+        //    return d.value.ip;
+        //})
+        .stack(eventsByAcType, "OP", function (d) {
+            return d.value.op;
+        })
+        .stack(eventsByAcType, "AE", function (d) {
+            return d.value.ae;
+        })
+        .stack(eventsByAcType, "GP", function (d) {
+            return d.value.gp;
+        })
+        //.x(d3.time.scale().domain([new Date(minEventDate), new Date(minEventDate.setMonth(minEventDate.getMonth() + 3))]))
+        //.x(d3.time.scale().domain([new Date(minEventDate), new Date(maxEventDate)]))
+        .x(d3.time.scale().domain([new Date(minEventDate), new Date(maxEventDate)]))
+        .xUnits(d3.time.days)
+        //.xUnits(function () { return 12; })
+        .elasticX(false)
+        //.xAxisPadding('10%')
+        //.yAxisLabel("# events")
+        //.y(d3.scale.linear().domain([0, 10]))
+        .centerBar(true)
+        //.elasticY(true)
+        .brushOn(true);
+        //.renderlet(colorRenderlet)
+        //.legend(dc.legend().x(100).y(0).itemHeight(13).gap(5))
+        //.xAxis().ticks(d3.time.mondays, 1);//.tickFormat(d3.time.format("%W"));
+
+    //$("#chartbrush").click(function () {
+    //    eventsChart.focus([new Date(minEventDate), new Date(minEventDate.setMonth(minEventDate.getMonth() + 3))]);
+    //});
+
+    dc.renderAll();
+
+    //$("#eventschart").animate({
+    //    scrollLeft: 10000
+    //}, 2000);
+
+    function rangesEqual(range1, range2) {
+        if (!range1 && !range2) {
+            return true;
+        }
+        else if (!range1 || !range2) {
+            return false;
+        }
+        else if (range1.length === 0 && range2.length === 0) {
+            return true;
+        }
+        else if (range1[0].valueOf() === range2[0].valueOf() &&
+            range1[1].valueOf() === range2[1].valueOf()) {
+            return true;
+        }
+        return false;
+    }
+
+    chartBrush.focusCharts = function (chartlist) {
+        if (!arguments.length) {
+            return this._focusCharts;
+        }
+        this._focusCharts = chartlist; // only needed to support the getter above
+        this.on('filtered', function (range_chart) {
+            if (!range_chart.filter()) {
+                dc.events.trigger(function () {
+                    chartlist.forEach(function (focus_chart) {
+                        focus_chart.x().domain(focus_chart.xOriginalDomain());
+                    });
+                });
+            } else chartlist.forEach(function (focus_chart) {
+                if (!rangesEqual(range_chart.filter(), focus_chart.filter())) {
+                    dc.events.trigger(function () {
+                        focus_chart.focus(range_chart.filter());
+                    });
+                }
+            });
+        });
+        return this;
     };
 
-    //chartExample.initData();
-    chartExample.initChart(data);
+    chartBrush.focusCharts([eventsChart]);
+
+    function print_filter(filter) {
+        var f = eval(filter);
+        if (typeof (f.length) != "undefined") { } else { }
+        if (typeof (f.top) != "undefined") { f = f.top(Infinity); } else { }
+        if (typeof (f.dimension) != "undefined") { f = f.dimension(function (d) { return ""; }).top(Infinity); } else { }
+        console.log(filter + "(" + f.length + ") = " + JSON.stringify(f).replace("[", "[\n\t").replace(/}\,/g, "},\n\t").replace("]", "\n]"));
+    }
 
 </script>
