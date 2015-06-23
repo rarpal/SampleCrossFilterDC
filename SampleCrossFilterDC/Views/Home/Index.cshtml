@@ -11,6 +11,35 @@
 <link href="~/Styles/dcSollis.css" rel="stylesheet" />*@
 <script src="../Scripts/jquery.dataTables.js"></script>
 <link href="../Styles/jquery.dataTables.css" rel="stylesheet" />
+<style>
+    div.tooltip {
+        position: absolute;
+        text-align: center; /*width: 60px;*/
+        width: auto; /*height: 28px;*/
+        height: auto;
+        padding: 5px;
+        font: 12px sans-serif;
+        background: lightsteelblue;
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
+    }
+
+    th {
+        background-color: #99CCFF;
+    }
+    /*td {
+            background-color: #C6E2FF;
+        }*/
+    td.details-control {
+        background: url('images/details_open.png') no-repeat center center;
+        cursor: pointer;
+    }
+
+    tr.shown td.details-control {
+        background: url('images/details_close.png') no-repeat center center;
+    }
+</style>
 
 <h2>StackedBarChart</h2>
 @*<div id="eventschart" style="width:1000px;height:550px;overflow-x:scroll"></div>*@
@@ -30,6 +59,9 @@
 </div>
 
 <script language="javascript">
+
+    var tl;
+    var td;
 
     var data = [
         { "DT_RowId": "1", "UniqueKey": "1-115976/OP/TST173092", "ActivityType": "OP", "ActivitySource": "Epsom & St Hellier", "EventDate": "2013-06-20", "AE_DisposalMethod": "", "AE_ArrivalTime": "", "AE_DepartureTime": "", "IP_DischargeDate": "", "IP_AdmissionMethod": "", "IP_PrimaryDiagnosis": "", "IP_EpisodesInSpell": "", "OP_Consultant": "Dr Moore", "OP_Specialty": "Kidneys", "OP_FirstFUP": "First", "OP_AttendedOrDidNotAttend": "Attended on time" },
