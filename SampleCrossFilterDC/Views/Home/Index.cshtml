@@ -3,12 +3,9 @@
 }
 <script src="~/Scripts/jquery-1.8.2.min.js"></script>
 <script src="~/Scripts/crossfilter.js"></script>
-@*<script src="~/Scripts/d3.v3.min.js"></script>*@
-<script src="~/Scripts/d3.js"></script>
+<script src="~/Scripts/d3.v3.min.js"></script>
 <script src="~/Scripts/dc.js"></script>
 <link href="~/Styles/dc.css" rel="stylesheet" />
-@*<script src="~/Scripts/dc-mod.js"></script>
-<link href="~/Styles/dcSollis.css" rel="stylesheet" />*@
 <script src="../Scripts/jquery.dataTables.js"></script>
 <link href="../Styles/jquery.dataTables.css" rel="stylesheet" />
 <style>
@@ -42,7 +39,6 @@
 </style>
 
 <h2>StackedBarChart</h2>
-@*<div id="eventschart" style="width:1000px;height:550px;overflow-x:scroll"></div>*@
 <div id="eventschart" style="width:1010px;height:350px"></div>
 <div id="chartbrush" style="width:1010px;height:110px;border:groove"></div>
 <div id="TableData" style="width:80%">
@@ -73,7 +69,6 @@
         { "DT_RowId": "7", "UniqueKey": "7-871014/GP/139985", "ActivityType": "GP", "ActivitySource": "Tadworth Medical Centre", "EventDate": "2015-01-09", "AE_DisposalMethod": "Ambulance", "AE_ArrivalTime": "15:31", "AE_DepartureTime": "19:12", "IP_DischargeDate": "2013-06-20", "IP_AdmissionMethod": "", "IP_PrimaryDiagnosis": "", "IP_EpisodesInSpell": "", "OP_Consultant": "", "OP_Specialty": "", "OP_FirstFUP": "", "OP_AttendedOrDidNotAttend": "" },
         { "DT_RowId": "8", "UniqueKey": "8-871016/GP/787121", "ActivityType": "GP", "ActivitySource": "Tadworth Medical Centre", "EventDate": "2015-03-14", "AE_DisposalMethod": "Ambulance", "AE_ArrivalTime": "15:31", "AE_DepartureTime": "19:12", "IP_DischargeDate": "2013-06-20", "IP_AdmissionMethod": "", "IP_PrimaryDiagnosis": "", "IP_EpisodesInSpell": "", "OP_Consultant": "", "OP_Specialty": "", "OP_FirstFUP": "", "OP_AttendedOrDidNotAttend": "" },
         { "DT_RowId": "9", "UniqueKey": "9-871015/GP/658358", "ActivityType": "GP", "ActivitySource": "Tadworth Medical Centre", "EventDate": "2015-05-06", "AE_DisposalMethod": "Ambulance", "AE_ArrivalTime": "15:31", "AE_DepartureTime": "19:12", "IP_DischargeDate": "2013-06-20", "IP_AdmissionMethod": "", "IP_PrimaryDiagnosis": "", "IP_EpisodesInSpell": "", "OP_Consultant": "", "OP_Specialty": "", "OP_FirstFUP": "", "OP_AttendedOrDidNotAttend": "" },
-        //
         { "DT_RowId": "10", "UniqueKey": "10-115976/OP/TST173092", "ActivityType": "OP", "ActivitySource": "Epsom & St Hellier", "EventDate": "2013-07-21", "AE_DisposalMethod": "Ambulance", "AE_ArrivalTime": "15:31", "AE_DepartureTime": "19:12", "IP_DischargeDate": "2013-06-20", "IP_AdmissionMethod": "", "IP_PrimaryDiagnosis": "", "IP_EpisodesInSpell": "", "OP_Consultant": "Dr Moore", "OP_Specialty": "Kidneys", "OP_FirstFUP": "First", "OP_AttendedOrDidNotAttend": "Attended on time" },
         { "DT_RowId": "11", "UniqueKey": "11-13687/IP/TST100954", "ActivityType": "IP", "ActivitySource": "St Georges", "EventDate": "2013-08-21", "AE_DisposalMethod": "", "AE_ArrivalTime": "", "AE_DepartureTime": "", "IP_DischargeDate": "2013-06-20", "IP_AdmissionMethod": "Main door", "IP_PrimaryDiagnosis": "Broken Leg", "IP_EpisodesInSpell": "3", "OP_Consultant": "", "OP_Specialty": "", "OP_FirstFUP": "", "OP_AttendedOrDidNotAttend": "" },
         { "DT_RowId": "12", "UniqueKey": "12-3834/IP/TST52450", "ActivityType": "IP", "ActivitySource": "Surbiton", "EventDate": "2013-09-23", "AE_DisposalMethod": "", "AE_ArrivalTime": "", "AE_DepartureTime": "", "IP_DischargeDate": "2013-06-20", "IP_AdmissionMethod": "Main door", "IP_PrimaryDiagnosis": "Broken Leg", "IP_EpisodesInSpell": "3", "OP_Consultant": "", "OP_Specialty": "", "OP_FirstFUP": "", "OP_AttendedOrDidNotAttend": "" },
@@ -83,20 +78,6 @@
         { "DT_RowId": "16", "UniqueKey": "16-871014/GP/139985", "ActivityType": "GP", "ActivitySource": "Tadworth Medical Centre", "EventDate": "2015-02-09", "AE_DisposalMethod": "Ambulance", "AE_ArrivalTime": "15:31", "AE_DepartureTime": "19:12", "IP_DischargeDate": "2013-06-20", "IP_AdmissionMethod": "", "IP_PrimaryDiagnosis": "", "IP_EpisodesInSpell": "", "OP_Consultant": "", "OP_Specialty": "", "OP_FirstFUP": "", "OP_AttendedOrDidNotAttend": "" },
         { "DT_RowId": "17", "UniqueKey": "17-871016/GP/787121", "ActivityType": "GP", "ActivitySource": "Tadworth Medical Centre", "EventDate": "2015-01-14", "AE_DisposalMethod": "Ambulance", "AE_ArrivalTime": "15:31", "AE_DepartureTime": "19:12", "IP_DischargeDate": "2013-06-20", "IP_AdmissionMethod": "", "IP_PrimaryDiagnosis": "", "IP_EpisodesInSpell": "", "OP_Consultant": "", "OP_Specialty": "", "OP_FirstFUP": "", "OP_AttendedOrDidNotAttend": "" },
         { "DT_RowId": "18", "UniqueKey": "18-871015/GP/658358", "ActivityType": "GP", "ActivitySource": "Tadworth Medical Centre", "EventDate": "2015-04-06", "AE_DisposalMethod": "Ambulance", "AE_ArrivalTime": "15:31", "AE_DepartureTime": "19:12", "IP_DischargeDate": "2013-06-20", "IP_AdmissionMethod": "", "IP_PrimaryDiagnosis": "", "IP_EpisodesInSpell": "", "OP_Consultant": "", "OP_Specialty": "", "OP_FirstFUP": "", "OP_AttendedOrDidNotAttend": "" }];
-    var pdata = [
-        { "DT_RowId": "1", "UniqueKey": "115976/OP/TST173092", "ActivityType": "OP", "ActivitySource": "RJ600", "EventDate": "2013-06-20" },
-        { "DT_RowId": "2", "UniqueKey": "13687/IP/TST100954", "ActivityType": "IP", "ActivitySource": "RVR00", "EventDate": "2013-07-21" },
-        { "DT_RowId": "3", "UniqueKey": "3834/IP/TST52450", "ActivityType": "IP", "ActivitySource": "REV00", "EventDate": "2013-08-23" },
-        { "DT_RowId": "4", "UniqueKey": "3834/OP/TST52450", "ActivityType": "OP", "ActivitySource": "REV00", "EventDate": "2013-08-23" },
-        { "DT_RowId": "5", "UniqueKey": "154539/AE/TST127800", "ActivityType": "AE", "ActivitySource": "RVR00", "EventDate": "2013-12-30" },
-        { "DT_RowId": "6", "UniqueKey": "154539/IP/TST127800", "ActivityType": "IP", "ActivitySource": "RVR00", "EventDate": "2013-12-30" },
-        { "DT_RowId": "7", "UniqueKey": "100112/OP/TST208196", "ActivityType": "OP", "ActivitySource": "REV00", "EventDate": "2014-01-24" },
-        { "DT_RowId": "8", "UniqueKey": "871017/GP/954967", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2014-11-29" },
-        { "DT_RowId": "9", "UniqueKey": "871014/GP/139985", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-01-09" },
-        { "DT_RowId": "10", "UniqueKey": "871016/GP/787121", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
-        { "DT_RowId": "11", "UniqueKey": "871016/GP/787122", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
-        { "DT_RowId": "12", "UniqueKey": "871016/IP/TST787122", "ActivityType": "IP", "ActivitySource": "P04400", "EventDate": "2015-03-14" },
-        { "DT_RowId": "13", "UniqueKey": "871015/GP/658358", "ActivityType": "GP", "ActivitySource": "P04400", "EventDate": "2015-05-06" }];
 
     dateFormat = d3.time.format("%Y/%m/%d");
 
@@ -107,9 +88,6 @@
     var eventsDim = ndx.dimension(function (d) {
         return d3.time.monday(new Date(d.EventDate))
     });
-    //var eventsDim = ndx.dimension(function (d) {
-    //    return d3.time.day(new Date(d.EventDate))
-    //});
 
     var eventsByAcType = eventsDim.group().reduce(
         function (p, v) {
@@ -161,14 +139,8 @@
         }
     );
 
-    //print_filter("ndx");
-    //print_filter("eventsByAcType");
-    //print_filter("eventsDim");
-
     var minEventDate = d3.min(pdata, function (d) { return d3.time.monday(new Date(d.EventDate)) });
     var maxEventDate = d3.max(pdata, function (d) { return d3.time.monday(new Date(d.EventDate)) });
-    //var minEventDate = d3.min(pdata, function (d) { return new Date(d.EventDate) });
-    //var maxEventDate = d3.max(pdata, function (d) { return new Date(d.EventDate) });
 
     eventsChart
         //.margins({ top: 50, right: 20, left: 50, bottom: 50 })
@@ -179,9 +151,6 @@
         .group(eventsByAcType, "IP", function (d) {
             return d.value.ip;
         })
-        //.valueAccessor(function (d) {
-        //    return d.value.ip;
-        //})
         .stack(eventsByAcType, "OP", function (d) {
             return d.value.op;
         })
@@ -191,20 +160,16 @@
         .stack(eventsByAcType, "GP", function (d) {
             return d.value.gp;
         })
-        //.x(d3.time.scale().domain([new Date(minEventDate), new Date(minEventDate.setMonth(minEventDate.getMonth() + 3))]))
-        //.x(d3.time.scale().domain([new Date(minEventDate), new Date(maxEventDate)]))
         .x(d3.time.scale().domain([new Date(minEventDate), new Date(maxEventDate)]))
         .xUnits(d3.time.mondays)
-        //.xUnits(function () { return 12; })
         .elasticX(false)
         //.xAxisPadding('10%')
         .yAxisLabel("# events")
-        //.y(d3.scale.linear().domain([0, 5]))
         .centerBar(false)
         .elasticY(true)
         .brushOn(false)
-        //.renderlet(colorRenderlet)
         .legend(dc.legend().x(100).y(0).itemHeight(13).gap(5));
+
     //eventsChart.xAxis().ticks(d3.time.mondays, 2).tickFormat(d3.time.format("%W"));
     //eventsChart.yAxis().ticks(dc.units.ordinal);
 
@@ -212,14 +177,11 @@
         //.margins({ top: 50, right: 20, left: 50, bottom: 50 })
         .width(1000)
         .height(100)
-        //.gap(50)
+        //.gap(10)
         .dimension(eventsDim)
         .group(eventsByAcType, "IP", function (d) {
             return d.value.ip;
         })
-        //.valueAccessor(function (d) {
-        //    return d.value.ip;
-        //})
         .stack(eventsByAcType, "OP", function (d) {
             return d.value.op;
         })
@@ -229,19 +191,14 @@
         .stack(eventsByAcType, "GP", function (d) {
             return d.value.gp;
         })
-        //.x(d3.time.scale().domain([new Date(minEventDate), new Date(minEventDate.setMonth(minEventDate.getMonth() + 3))]))
-        //.x(d3.time.scale().domain([new Date(minEventDate), new Date(maxEventDate)]))
         .x(d3.time.scale().domain([new Date(minEventDate), new Date(maxEventDate)]))
         .xUnits(d3.time.days)
-        //.xUnits(function () { return 12; })
         .elasticX(false)
         //.xAxisPadding('10%')
         //.yAxisLabel("# events")
-        //.y(d3.scale.linear().domain([0, 10]))
         .centerBar(true)
         //.elasticY(true)
         .brushOn(true);
-        //.renderlet(colorRenderlet)
         //.legend(dc.legend().x(100).y(0).itemHeight(13).gap(5))
         //.xAxis().ticks(d3.time.mondays, 1);//.tickFormat(d3.time.format("%W"));
 
@@ -250,7 +207,6 @@
         "filter": false,
         "sort": true,
         "scrollY": "500px",
-        //"aaData": countryDimension.top(Infinity),
         "aaData": eventsDim.top(Infinity),
         "columns": [
             {
@@ -297,31 +253,13 @@
 
     dc.renderAll();
 
-    //$("#eventschart").animate({
-    //    scrollLeft: 10000
-    //}, 2000);
-
-    function ExpandTimeLine() {
-        //Need to create additional timeline controls for each source identified in dimension
-        var sources = sourceDimen.group().all();
-        sources.forEach(function (d, i) {
-            var thisD = sourceDimen.top(Infinity).filter(function (d2) { return d2.ActivitySource == d.key; });
-            var thisCF = crossfilter(thisD);
-            var thisS = thisCF.dimension(function (d) { return d.ActivitySource; });
-            var thisSG = thisS.group().reduceCount();
-            var mid = d3.min(thisD, function (d) { return new Date(d.EventDate) });
-            var mxd = d3.max(thisD, function (d) { return new Date(d.EventDate) });
-            var dv = d3.select("#TimePlaceHolder").append("div").append("p").text(d.key).append("div").attr("id", "TL" + i).style("width", "400px").style("height", "200px");
-            var a = dc.timeLine("#TL" + i).width("400").height("200").dimension(thisS).group(thisSG).x(d3.time.scale().domain([new Date(mid), new Date(mxd)]).rangeRound([10, 800]));
-            a.render();
-        });
-    }
     function RefreshTable() {
         dc.events.trigger(function () {
-            //alldata = countryDimension.top(Infinity);
             alldata = eventsDim.top(Infinity);
             table.fnClearTable();
-            table.fnAddData(alldata);
+            if (alldata.length > 0) {
+                table.fnAddData(alldata);
+            }
             table.fnDraw();
         });
     }
@@ -429,13 +367,5 @@
     };
 
     chartBrush.focusCharts([eventsChart]);
-
-    function print_filter(filter) {
-        var f = eval(filter);
-        if (typeof (f.length) != "undefined") { } else { }
-        if (typeof (f.top) != "undefined") { f = f.top(Infinity); } else { }
-        if (typeof (f.dimension) != "undefined") { f = f.dimension(function (d) { return ""; }).top(Infinity); } else { }
-        console.log(filter + "(" + f.length + ") = " + JSON.stringify(f).replace("[", "[\n\t").replace(/}\,/g, "},\n\t").replace("]", "\n]"));
-    }
 
 </script>
